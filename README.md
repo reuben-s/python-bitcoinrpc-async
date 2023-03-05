@@ -33,7 +33,22 @@ async def main():
     rpc_connection = AuthServiceProxy(f"http://{rpc_user}:{rpc_password}@127.0.0.1:8332")
     best_block_hash = await rpc_connection.getbestblockhash()
     print(best_block_hash)
+    await rpc_connection.close()
       
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main())
+```
+
+# Example using context manager
+```python
+from bitcoinrpcasync.authproxy import AuthServiceProxy, JSONRPCException
+import asyncio
+
+async def main():
+    async with AuthServiceProxy(f"http://{rpc_user}:{rpc_password}@127.0.0.1:8332") as rpc_connection:
+        best_block_hash = await rpc_connection.getbestblockhash()
+        print(best_block_hash)
+
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main())
 ```

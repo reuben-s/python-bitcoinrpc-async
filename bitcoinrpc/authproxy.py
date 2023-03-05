@@ -45,6 +45,7 @@ except ImportError:
 
 # async port
 import aiohttp
+import asyncio
 
 USER_AGENT = "AuthServiceProxy/0.1"
 
@@ -70,7 +71,6 @@ class JSONRPCException(Exception):
     def __repr__(self):
         return '<%s \'%s\'>' % (self.__class__.__name__, self)
 
-
 def EncodeDecimal(o):
     if isinstance(o, decimal.Decimal):
         return float(round(o, 8))
@@ -95,7 +95,19 @@ class AuthServiceProxy(object):
             # Callables re-use the connection of the original proxy
             self.__conn = connection
         else:
+            print("Creating new connection")
             self.__conn = aiohttp.ClientSession()
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, traceback):
+        if self.__conn:
+            await self.__conn.close()
+            self.__conn = None
+
+    async def close(self):
+        await self.__conn.close()
 
     def __getattr__(self, name):
         if name.startswith('__') and name.endswith('__'):
@@ -115,23 +127,23 @@ class AuthServiceProxy(object):
                                'params': args,
                                'id': AuthServiceProxy.__id_count}
                                
-        response = await self.__conn.post(
+        async with self.__conn.post(
             f"http://{self.__url.hostname}:{self.__url.port}",
             auth=aiohttp.BasicAuth(self.__url.username, self.__url.password), 
             json=postdata,
             headers={'Host': self.__url.hostname,
             'User-Agent': USER_AGENT,
             'Content-type': 'application/json'}
-            )
+            ) as response:
 
-        parsed_response = await self._parse_response(response)
-        if parsed_response.get('error') is not None:
-            raise JSONRPCException(parsed_response['error'])
-        elif 'result' not in parsed_response:
-            raise JSONRPCException({
-                'code': -343, 'message': 'missing JSON-RPC result'})
-        
-        return parsed_response['result']
+            parsed_response = await self._parse_response(response)
+            if parsed_response.get('error') is not None:
+                raise JSONRPCException(parsed_response['error'])
+            elif 'result' not in parsed_response:
+                raise JSONRPCException({
+                    'code': -343, 'message': 'missing JSON-RPC result'})
+            
+            return parsed_response['result']
 
     def batch_(self, rpc_calls):
         """Batch RPC call.

@@ -10,7 +10,7 @@ It includes the following generic improvements:
 * sends protocol 'version', per JSON-RPC 1.1
 * sends proper, incrementing 'id'
 * can optionally log all RPC calls and results
-* JSON-2.0 batch support
+* JSON-2.0 batch support (Not yet supported)
 
 It also includes the following bitcoin-specific details:
 

@@ -12,6 +12,7 @@ It includes the following features:
 - HTTP connections persist for the life of the AuthServiceProxy object
 - sends protocol 'version', per JSON-RPC 1.1
 - sends proper, incrementing 'id'
+- uses standard Python json lib
 - can optionally log all RPC calls and results
 - JSON-2.0 batch support
 

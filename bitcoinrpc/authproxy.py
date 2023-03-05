@@ -95,7 +95,9 @@ class AuthServiceProxy(object):
             # Callables re-use the connection of the original proxy
             self.__conn = connection
         else:
-            self.__conn = aiohttp.ClientSession()
+            t = aiohttp.ClientTimeout(total=self.__timeout)
+            print("Creating new connection")
+            self.__conn = aiohttp.ClientSession(timeout=t)
 
     async def __aenter__(self):
         return self

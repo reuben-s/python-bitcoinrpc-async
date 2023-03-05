@@ -80,7 +80,7 @@ DEBUG:BitcoinRPC:-1-> getinfo []
 DEBUG:BitcoinRPC:<-1- {"connections": 8, ...etc }
 ```
 
-# Socket timeouts under heavy load - Not yet supported
+# Socket timeouts under heavy load
 Pass the timeout argument to prevent "socket timed out" exceptions:
 
 ```python

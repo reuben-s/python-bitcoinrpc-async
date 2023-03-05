@@ -106,7 +106,6 @@ class AuthServiceProxy(object):
             self.__conn = connection
         else:
             t = aiohttp.ClientTimeout(total=self.__timeout)
-            print("Creating new connection")
             self.__conn = aiohttp.ClientSession(timeout=t)
 
     async def __aenter__(self):
@@ -131,32 +130,24 @@ class AuthServiceProxy(object):
     async def __call__(self, *args):
         AuthServiceProxy.__id_count += 1
 
-        log.debug("-%s-> %s %s"%(AuthServiceProxy.__id_count, self.__service_name,
-                                 json.dumps(args, default=EncodeDecimal)))
-        postdata = json.dumps({'version': '1.1',
-                               'method': self.__service_name,
-                               'params': args,
-                               'id': AuthServiceProxy.__id_count}, default=EncodeDecimal)
-                               
-        async with self.__conn.post(
-            f"http://{self.__url.hostname}:{self.__url.port}",
-            auth=aiohttp.BasicAuth(self.__url.username, self.__url.password), 
-            data=postdata,
-            headers={'Host': self.__url.hostname,
-            'User-Agent': USER_AGENT,
-            'Content-type': 'application/json'}
-            ) as response:
+        response = await self._post(
+            {
+                'version': '1.1',
+                'method': self.__service_name,
+                'params': args,
+                'id': AuthServiceProxy.__id_count
+            }
+        )
 
-            parsed_response = await self._parse_response(response)
-            if parsed_response.get('error') is not None:
-                raise JSONRPCException(parsed_response['error'])
-            elif 'result' not in parsed_response:
-                raise JSONRPCException({
-                    'code': -343, 'message': 'missing JSON-RPC result'})
+        parsed_response = await self._parse_response(response)
+        if parsed_response.get('error') is not None:
+            raise JSONRPCException(parsed_response['error'])
+        elif 'result' not in parsed_response:
+            raise JSONRPCException({'code': -343, 'message': 'missing JSON-RPC result'})
             
-            return parsed_response['result']
+        return parsed_response['result']
 
-    def batch_(self, rpc_calls):
+    async def batch_(self, rpc_calls):
         """Batch RPC call.
            Pass array of arrays: [ [ "method", params... ], ... ]
            Returns array of results.
@@ -167,15 +158,10 @@ class AuthServiceProxy(object):
             m = rpc_call.pop(0)
             batch_data.append({"jsonrpc":"2.0", "method":m, "params":rpc_call, "id":AuthServiceProxy.__id_count})
 
-        postdata = json.dumps(batch_data, default=EncodeDecimal)
-        log.debug("--> "+postdata)
-        self.__conn.request('POST', self.__url.path, postdata,
-                            {'Host': self.__url.hostname,
-                             'User-Agent': USER_AGENT,
-                             'Authorization': self.__auth_header,
-                             'Content-type': 'application/json'})
+        response = await self._post(batch_data)
+
         results = []
-        responses = self._get_response()
+        responses = await self._parse_response(response)
         if isinstance(responses, (dict,)):
             if ('error' in responses) and (responses['error'] is not None):
                 raise JSONRPCException(responses['error'])
@@ -191,6 +177,23 @@ class AuthServiceProxy(object):
                 results.append(response['result'])
         return results
 
+    async def _post(self, data):
+        postdata = json.dumps(data, default=EncodeDecimal)
+
+        log.debug(f"-{AuthServiceProxy.__id_count}-> {self.__service_name} {postdata}")
+
+        response = await self.__conn.post(
+            f"http://{self.__url.hostname}:{self.__url.port}",
+            auth=aiohttp.BasicAuth(self.__url.username, self.__url.password), 
+            data=postdata,
+            headers={
+                'Host': self.__url.hostname,
+                'User-Agent': USER_AGENT,
+                'Content-type': 'application/json'
+                }
+        )
+        return response
+
     async def _parse_response(self, response):
         content_type = response.headers['Content-Type']
         if content_type != 'application/json':
@@ -198,9 +201,9 @@ class AuthServiceProxy(object):
                 'code': -342, 'message': 'non-JSON HTTP response with \'%i %s\' from server' % (response.status, response.reason)})
 
         text = await response.text()
-        response_json = json.loads(response, parse_float=decimal.Decimal)
+        response_json = json.loads(text, parse_float=decimal.Decimal)
         if "error" in response_json and response_json["error"] is None:
-            log.debug("<-%s- %s"%(response_json["id"], json.dumps(response_json["result"], default=EncodeDecimal)))
+            log.debug(f"<-{response_json['id']}- {response_json}")
         else:
-            log.debug("<-- ", response_json)
+            log.debug(f"<-- {response_json}")
         return response_json

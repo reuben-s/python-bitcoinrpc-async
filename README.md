@@ -13,7 +13,7 @@ It includes the following features:
 - sends protocol 'version', per JSON-RPC 1.1
 - sends proper, incrementing 'id'
 - can optionally log all RPC calls and results
-- JSON-2.0 batch support (Not yet supported)
+- JSON-2.0 batch support
 
 It also includes the following bitcoin-specific details:
 
@@ -52,6 +52,23 @@ async def main():
     async with AuthServiceProxy(f"http://{rpc_user}:{rpc_password}@127.0.0.1:8332") as rpc_connection:
         best_block_hash = await rpc_connection.getbestblockhash()
         print(best_block_hash)
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main())
+```
+
+## Batch support
+```python
+from bitcoinrpcasync.authproxy import AuthServiceProxy, JSONRPCException
+import asyncio
+
+async def main():
+    async with AuthServiceProxy(f"http://{rpc_user}:{rpc_password}@127.0.0.1:8332") as rpc_connection:
+        commands = [ [ "getblockhash", height] for height in range(100) ]
+        block_hashes = await rpc_connection.batch_(commands)
+        blocks = await rpc_connection.batch_([ [ "getblock", h ] for h in block_hashes ])
+        block_times = [ block["time"] for block in blocks ]
+        print(block_times)
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main())

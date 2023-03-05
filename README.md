@@ -1,9 +1,14 @@
 # python-bitcoinrpc-async
 
-AuthServiceProxy is an improved version of python-jsonrpc.
+python-bitcoinrpc-async adds asyncronous functionality to the AuthServiceProxy. It includes asyncio compatible methods for making and handling requests, making it easy to integrate into your codebase. With python-bitcoin-rpc you can now take advantage of the benefits of asynchronous programming, using the modern `async` and `await` syntax. 
 
-It includes the following generic improvements:
+## AuthServiceProxy
 
+AuthServiceProxy is an asyncio compatible version of python-bitcoinrpc.
+
+It includes the following features:
+
+- Asynchronous context manager for performing asyncronous HTTP requests
 - HTTP connections persist for the life of the AuthServiceProxy object
 - sends protocol 'version', per JSON-RPC 1.1
 - sends proper, incrementing 'id'
@@ -16,13 +21,13 @@ It also includes the following bitcoin-specific details:
 - parses all JSON numbers that look like floats as Decimal,
   and serializes Decimal values to JSON-RPC connections. (Not yet supported)
 
-# Installation
+## Installation
 
 ```
 pip install python-bitcoinrpc-async
 ```
 
-# Example
+## Example
 
 ```python
 from bitcoinrpcasync.authproxy import AuthServiceProxy, JSONRPCException
@@ -39,7 +44,7 @@ loop = asyncio.get_event_loop()
 loop.run_until_complete(main())
 ```
 
-# Example using context manager
+## Example using context manager
 ```python
 from bitcoinrpcasync.authproxy import AuthServiceProxy, JSONRPCException
 import asyncio
@@ -53,7 +58,7 @@ loop = asyncio.get_event_loop()
 loop.run_until_complete(main())
 ```
 
-# Logging all RPC calls to stderr
+## Logging all RPC calls to stderr
 
 ```python
 from bitcoinrpcasync.authproxy import AuthServiceProxy, JSONRPCException
@@ -80,7 +85,7 @@ DEBUG:BitcoinRPC:-1-> getinfo []
 DEBUG:BitcoinRPC:<-1- {"connections": 8, ...etc }
 ```
 
-# Socket timeouts under heavy load
+## Socket timeouts under heavy load
 Pass the timeout argument to prevent "socket timed out" exceptions:
 
 ```python

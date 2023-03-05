@@ -1,5 +1,15 @@
 
 """
+  Copyright 2023 Reuben S
+
+  python-bitcoinrpc-async adds asyncronous functionality to the AuthServiceProxy. 
+  Includes asyncio compatible methods for making and handling requests, 
+  making it easy to integrate into your codebase. 
+  You can now take advantage of the benefits of asynchronous programming, using 
+  the modern async and await syntax. 
+
+  Previous copyright, from python-bitcoinrpc/bitcoinrpc/authproxy.py:
+
   Copyright 2011 Jeff Garzik
 
   AuthServiceProxy has the following improvements over python-jsonrpc's

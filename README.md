@@ -85,9 +85,9 @@ logging.basicConfig()
 logging.getLogger("BitcoinRPC").setLevel(logging.DEBUG)
 
 async def main():
-    rpc_connection = AuthServiceProxy(f"http://{rpc_user}:{rpc_password}@127.0.0.1:8332")
-    info = await rpc_connection.getinfo()
-    print(info)
+    async with AuthServiceProxy(f"http://{rpc_user}:{rpc_password}@127.0.0.1:8332") as rpc_connection:
+        info = await rpc_connection.getinfo()
+        print(info)
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(main())

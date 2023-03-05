@@ -18,8 +18,7 @@ It includes the following features:
 It also includes the following bitcoin-specific details:
 
 - sends Basic HTTP authentication headers
-- parses all JSON numbers that look like floats as Decimal,
-  and serializes Decimal values to JSON-RPC connections. (Not yet supported)
+- parses all JSON numbers that look like floats as Decimal, and serializes Decimal values to JSON-RPC connections.
 
 ## Installation
 

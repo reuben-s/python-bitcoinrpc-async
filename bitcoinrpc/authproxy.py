@@ -133,15 +133,15 @@ class AuthServiceProxy(object):
 
         log.debug("-%s-> %s %s"%(AuthServiceProxy.__id_count, self.__service_name,
                                  json.dumps(args, default=EncodeDecimal)))
-        postdata = {'version': '1.1',
+        postdata = json.dumps({'version': '1.1',
                                'method': self.__service_name,
                                'params': args,
-                               'id': AuthServiceProxy.__id_count}
+                               'id': AuthServiceProxy.__id_count}, default=EncodeDecimal)
                                
         async with self.__conn.post(
             f"http://{self.__url.hostname}:{self.__url.port}",
             auth=aiohttp.BasicAuth(self.__url.username, self.__url.password), 
-            json=postdata,
+            data=postdata,
             headers={'Host': self.__url.hostname,
             'User-Agent': USER_AGENT,
             'Content-type': 'application/json'}
@@ -197,7 +197,8 @@ class AuthServiceProxy(object):
             raise JSONRPCException({
                 'code': -342, 'message': 'non-JSON HTTP response with \'%i %s\' from server' % (response.status, response.reason)})
 
-        response_json = await response.json()
+        text = await response.text()
+        response_json = json.loads(response, parse_float=decimal.Decimal)
         if "error" in response_json and response_json["error"] is None:
             log.debug("<-%s- %s"%(response_json["id"], json.dumps(response_json["result"], default=EncodeDecimal)))
         else:

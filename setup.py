@@ -3,16 +3,19 @@
 from distutils.core import setup
 
 setup(
-    name='python-bitcoinrpc',
+    name='python-bitcoinrpc-async',
     version='1.0',
-    description='Enhanced version of python-jsonrpc for use with Bitcoin',
-    long_description=open('README.rst').read(),
-    author='Jeff Garzik',
-    author_email='<jgarzik@pobox.com>',
-    maintainer='Jeff Garzik',
-    maintainer_email='<jgarzik@pobox.com>',
-    url='http://www.github.com/jgarzik/python-bitcoinrpc',
-    packages=['bitcoinrpc'],
+    description='Enhanced version of python-jsonrpc for use with Bitcoin, for async use.',
+    long_description=open('README.md').read(),
+    author='Reuben S',
+    author_email='',
+    maintainer='Reuben S',
+    maintainer_email='',
+    url='https://github.com/reuben-s/python-bitcoinrpc-async',
+    packages=['bitcoinrpcasync'],
+    install_requires=[
+        'aiohttp'
+    ],
     classifiers=[
         'License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)', 'Operating System :: OS Independent'
     ]

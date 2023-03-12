@@ -28,25 +28,8 @@ pip install python-bitcoinrpc-async
 ```
 
 ## Example
-
 ```python
-from bitcoinrpcasync.authproxy import AuthServiceProxy, JSONRPCException
-import asyncio
-    
-async def main():
-    # rpc_user and rpc_password are set in the bitcoin.conf file
-    rpc_connection = AuthServiceProxy(f"http://{rpc_user}:{rpc_password}@127.0.0.1:8332")
-    best_block_hash = await rpc_connection.getbestblockhash()
-    print(best_block_hash)
-    await rpc_connection.close()
-      
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main())
-```
-
-## Example using context manager
-```python
-from bitcoinrpcasync.authproxy import AuthServiceProxy, JSONRPCException
+from bitcoinrpcasync import AuthServiceProxy, JSONRPCException
 import asyncio
 
 async def main():
@@ -60,15 +43,15 @@ loop.run_until_complete(main())
 
 ## Batch support
 ```python
-from bitcoinrpcasync.authproxy import AuthServiceProxy, JSONRPCException
+from bitcoinrpcasync import AuthServiceProxy, JSONRPCException
 import asyncio
 
 async def main():
     async with AuthServiceProxy(f"http://{rpc_user}:{rpc_password}@127.0.0.1:8332") as rpc_connection:
-        commands = [ [ "getblockhash", height] for height in range(100) ]
+        commands = [["getblockhash", height] for height in range(100)]
         block_hashes = await rpc_connection.batch_(commands)
-        blocks = await rpc_connection.batch_([ [ "getblock", h ] for h in block_hashes ])
-        block_times = [ block["time"] for block in blocks ]
+        blocks = await rpc_connection.batch_([["getblock", h] for h in block_hashes])
+        block_times = [block["time"] for block in blocks]
         print(block_times)
 
 loop = asyncio.get_event_loop()
@@ -78,7 +61,7 @@ loop.run_until_complete(main())
 ## Logging all RPC calls to stderr
 
 ```python
-from bitcoinrpcasync.authproxy import AuthServiceProxy, JSONRPCException
+from bitcoinrpcasync import AuthServiceProxy, JSONRPCException
 import logging
 import asyncio
 
@@ -106,5 +89,11 @@ DEBUG:BitcoinRPC:<-1- {"connections": 8, ...etc }
 Pass the timeout argument to prevent "socket timed out" exceptions:
 
 ```python
-rpc_connection = AuthServiceProxy(f"http://{rpc_user}:{rpc_password}@127.0.0.1:8332", timeout=120)
+AuthServiceProxy(f"http://{rpc_user}:{rpc_password}@127.0.0.1:8332", timeout=120)
+```
+
+## SSL/TLS connections
+To set up a SSL/TLS connection pass a `ssl.SSLContext` object into the ssl_context default parameter of the `AuthServiceProxy`:
+```python
+AuthServiceProxy(f"http://{rpc_user}:{rpc_password}@127.0.0.1:8332", ssl_context=ssl.create_default_context())
 ```

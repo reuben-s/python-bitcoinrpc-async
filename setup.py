@@ -4,13 +4,11 @@ from distutils.core import setup
 
 setup(
     name='python-bitcoinrpc-async',
-    version='1.0',
+    version='1.0.0',
     description='Enhanced version of python-jsonrpc for use with Bitcoin, for async use.',
     long_description=open('README.md').read(),
     author='Reuben S',
-    author_email='',
     maintainer='Reuben S',
-    maintainer_email='',
     url='https://github.com/reuben-s/python-bitcoinrpc-async',
     packages=['bitcoinrpcasync'],
     install_requires=[

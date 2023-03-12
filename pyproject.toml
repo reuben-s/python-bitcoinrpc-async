@@ -1,0 +1,26 @@
+# pyproject.toml
+
+[build-system]
+requires      = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "python-bitcoinrpc-async"
+version = "1.0.0"
+description = "Enhanced version of python-jsonrpc for use with Bitcoin, for async use."
+readme = "README.md"
+authors = [{ name = "Reuben S" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["bitcoin", "async", "bitcoincore"]
+dependencies = [
+    "aiohttp"
+]
+requires-python = ">=3.9"
+
+[project.urls]
+Homepage = "https://github.com/reuben-s/python-bitcoinrpc-async"

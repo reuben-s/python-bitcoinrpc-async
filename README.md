@@ -93,7 +93,7 @@ AuthServiceProxy(f"http://{rpc_user}:{rpc_password}@127.0.0.1:8332", timeout=120
 ```
 
 ## SSL/TLS connections
-To set up a SSL/TLS connection pass a `ssl.SSLContext` object into the ssl_context default parameter of the `AuthServiceProxy`:
+To set up a SSL/TLS connection pass a `ssl.SSLContext` object into the ssl_context argument of the `AuthServiceProxy`:
 ```python
 AuthServiceProxy(f"http://{rpc_user}:{rpc_password}@127.0.0.1:8332", ssl_context=ssl.create_default_context())
 ```

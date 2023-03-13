@@ -29,7 +29,7 @@ pip install python-bitcoinrpc-async
 
 ## Example
 ```python
-from bitcoinrpcasync import AuthServiceProxy, JSONRPCException
+from bitcoinrpcasync import AuthServiceProxy
 import asyncio
 
 async def main():
@@ -43,7 +43,7 @@ loop.run_until_complete(main())
 
 ## Batch support
 ```python
-from bitcoinrpcasync import AuthServiceProxy, JSONRPCException
+from bitcoinrpcasync import AuthServiceProxy
 import asyncio
 
 async def main():
@@ -61,7 +61,7 @@ loop.run_until_complete(main())
 ## Logging all RPC calls to stderr
 
 ```python
-from bitcoinrpcasync import AuthServiceProxy, JSONRPCException
+from bitcoinrpcasync import AuthServiceProxy
 import logging
 import asyncio
 

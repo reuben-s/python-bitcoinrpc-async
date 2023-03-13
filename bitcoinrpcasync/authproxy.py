@@ -48,25 +48,33 @@ from __future__ import annotations
 
 import decimal
 import json
-import logging
+from logging import Logger, getLogger
+from types import TracebackType
 import urllib.parse as urlparse
-import asyncio
 
 from typing import (
     Dict, 
     List,
     Callable,
     Tuple,
+    Optional,
+    Type,
     Any
 )
 
-import aiohttp
+from aiohttp import (
+    ClientSession,
+    ClientResponse,
+    BasicAuth,
+    TCPConnector,
+    ClientTimeout
+)
 
 USER_AGENT: str = "AuthServiceProxy/0.1"
 
 HTTP_TIMEOUT: int = 30
 
-log: Logger = logging.getLogger("BitcoinRPC")
+log: Logger = getLogger("BitcoinRPC")
 
 class JSONRPCException(Exception):
     def __init__(
@@ -107,7 +115,7 @@ class AuthServiceProxy:
         ) -> None:
         self.__service_url: str = service_url
         self.__service_name: str = service_name
-        self.__url: ParseResult = urlparse.urlparse(service_url)
+        self.__url: urlparse.ParseResult = urlparse.urlparse(service_url)
 
         self.__timeout: int = timeout
 
@@ -115,13 +123,13 @@ class AuthServiceProxy:
             # Callables re-use the connection of the original proxy
             self.__conn: ClientSession = connection
         elif self.__url.scheme == "https":
-            self.__conn: ClientSession = aiohttp.ClientSession(
-                timeout = aiohttp.ClientTimeout(total = self.__timeout),
-                connector = aiohttp.TCPConnector(ssl = ssl_context)
+            self.__conn: ClientSession = ClientSession(
+                timeout = ClientTimeout(total = self.__timeout),
+                connector = TCPConnector(ssl = ssl_context)
             )
         else:
-            self.__conn: ClientSession = aiohttp.ClientSession(
-                timeout = aiohttp.ClientTimeout(total = self.__timeout)
+            self.__conn: ClientSession = ClientSession(
+                timeout = ClientTimeout(total = self.__timeout)
             )
 
     async def __aenter__(self) -> AuthServiceProxy:
@@ -179,13 +187,13 @@ class AuthServiceProxy:
 
     async def batch_(
         self, 
-        rpc_calls: List[List[str, Any, ...], ...]
-        ) -> List[Any, ...]:
+        rpc_calls: List[List[Any]]
+        ) -> List[Any]:
         """Batch RPC call.
            Pass array of arrays: [ [ "method", params... ], ... ]
            Returns array of results.
         """
-        batch_data: Dict[str, Any] = []
+        batch_data: Dict[Any] = []
         for rpc_call in rpc_calls:
             AuthServiceProxy.__id_count += 1
             method: str = rpc_call.pop(0)
@@ -198,12 +206,12 @@ class AuthServiceProxy:
                 }
             )
 
-        log.debug(f"--> {postdata}")
+        log.debug(f"--> {batch_data}")
 
         response: ClientResponse = await self._post(batch_data)
 
         responses: Dict[str, Any] = await self._parse_response(response)
-        results: List[Any, ...] = []
+        results: List[Any] = []
 
         if isinstance(responses, (dict,)):
             if ("error" in responses) and (responses["error"] is not None):
@@ -240,7 +248,7 @@ class AuthServiceProxy:
 
         response: ClientResponse = await self.__conn.post(
             f"http://{self.__url.hostname}:{self.__url.port}",
-            auth = aiohttp.BasicAuth(self.__url.username, self.__url.password), 
+            auth = BasicAuth(self.__url.username, self.__url.password), 
             data = postdata,
             headers = {
                 "Host": self.__url.hostname,

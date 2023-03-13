@@ -142,7 +142,7 @@ class AuthServiceProxy:
         traceback: Optional[TracebackType]
         ) -> None:
         if self.__conn:
-            await self.__conn.close()
+            await self.__conn.__aexit__(exc_type, exc_val, traceback)
 
     async def close(self) -> None:
         await self.__conn.close()
@@ -155,7 +155,7 @@ class AuthServiceProxy:
             # Python internal stuff
             raise AttributeError
         if self.__service_name is not None:
-            name = "%s.%s" % (self.__service_name, name)
+            name = f"{self.__service_name}.{name}"
 
         return AuthServiceProxy(self.__service_url, name, self.__timeout, self.__conn)
 
